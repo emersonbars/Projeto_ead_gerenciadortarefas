@@ -1,27 +1,79 @@
-from flask import render_template, redirect, url_for
-from APP import app
+from flask import render_template, redirect, url_for, request, flash
 
-# Rota para a página inicial e de login
+from APP import app, db, bcrypt
+from APP.models import Usuario
+from flask_login import login_user, logout_user, login_required, current_user
+
+
 @app.route('/')
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+
+        usuario = Usuario.query.filter_by(username=username).first()
+
+
+        if usuario and bcrypt.check_password_hash(usuario.password_hash, password):
+
+            login_user(usuario)
+            flash(f'Login bem-sucedido! Bem-vindo, {usuario.username}!', 'success')
+
+            return redirect(url_for('dashboard'))
+        else:
+
+            flash('Login falhou. Verifique o nome de usuário e a senha.', 'danger')
 
     return render_template('login.html')
 
 
-@app.route('/cadastro')
+@app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
+
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+        
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+
+        senha_hash = bcrypt.generate_password_hash(password).decode('utf-8')
+
+
+        novo_usuario = Usuario(username=username, email=email, password_hash=senha_hash)
+
+
+        db.session.add(novo_usuario)
+
+        db.session.commit()
+
+
+        flash('Sua conta foi criada com sucesso! Você já pode fazer login.', 'success')
+
+        return redirect(url_for('login'))
+
+
     return render_template('cadastro.html')
 
 
 @app.route('/dashboard')
+@login_required  
 def dashboard():
 
-    usuario_falso = {'username': 'Visitante'}
-    return render_template('dashboard.html', current_user=usuario_falso)
+    return render_template('dashboard.html')
 
-# Rota para o logout
+
 @app.route('/logout')
 def logout():
-
+    logout_user() 
+    flash('Você saiu da sua conta.', 'info')
     return redirect(url_for('login'))
+
