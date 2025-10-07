@@ -1,0 +1,9 @@
+# Arquivo de configuração do Flask (não deve ser versionado)
+.flaskenv
+
+# Pasta de cache do Python
+__pycache__/
+
+# Arquivos de ambiente virtual (se você decidir usar no futuro)
+venv/
+.venv/

@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, request, flash
 
 from APP import app, db, bcrypt
-from APP.models import Usuario
+from APP.models import Usuario,Tarefa
 from flask_login import login_user, logout_user, login_required, current_user
 
 
@@ -77,3 +77,22 @@ def logout():
     flash('Você saiu da sua conta.', 'info')
     return redirect(url_for('login'))
 
+
+@app.route('/dashboard', methods=['GET', 'POST']) 
+@login_required
+def dashboard():
+
+    if request.method == 'POST':
+        titulo_tarefa = request.form.get('titulo')
+        
+        
+        nova_tarefa = Tarefa(titulo=titulo_tarefa, autor=current_user)
+        
+        db.session.add(nova_tarefa)
+        db.session.commit()
+        
+        flash('Tarefa adicionada com sucesso!', 'success')
+        return redirect(url_for('dashboard'))
+
+    
+    return render_template('dashboard.html')
