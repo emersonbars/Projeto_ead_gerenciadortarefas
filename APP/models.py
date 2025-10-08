@@ -23,8 +23,14 @@ class Tarefa(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     titulo = db.Column(db.String(100), nullable=False)
     data_criacao = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    
+
+    data_prazo = db.Column(db.DateTime, nullable=True) 
+
     concluida = db.Column(db.Boolean, default=False)
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
 
     def __repr__(self):
         return f"Tarefa('{self.titulo}', '{self.data_criacao}')"
+
+
