@@ -102,6 +102,47 @@ def dashboard():
     tarefas_do_usuario = Tarefa.query.filter_by(usuario_id=current_user.id).order_by(Tarefa.data_criacao.desc()).all()
     return render_template('dashboard.html', tarefas=tarefas_do_usuario)
 
+@app.route('/tarefa/<int:tarefa_id>/concluir', methods=['POST'])
+@login_required
+def concluir_tarefa(tarefa_id):
+    
+    tarefa = Tarefa.query.get_or_404(tarefa_id)
+
+    
+    if tarefa.usuario_id != current_user.id:
+        flash('Operação não permitida.', 'danger')
+        return redirect(url_for('dashboard'))
+
+    
+    tarefa.concluida = True
+    db.session.commit()
+
+    flash('Tarefa marcada como concluída!', 'success')
+    
+    
+    return redirect(url_for('dashboard'))
+
+@app.route('/tarefa/<int:tarefa_id>/excluir', methods=['POST'])
+@login_required
+def excluir_tarefa(tarefa_id):
+
+    tarefa = Tarefa.query.get_or_404(tarefa_id)
+
+
+    if tarefa.usuario_id != current_user.id:
+        flash('Operação não permitida.', 'danger')
+        return redirect(url_for('dashboard'))
+
+
+    db.session.delete(tarefa)
+    db.session.commit()
+
+    flash('Tarefa excluída com sucesso!', 'success')
+    
+ 
+    return redirect(url_for('dashboard'))
+
+
 @app.route('/logout')
 @login_required 
 def logout():

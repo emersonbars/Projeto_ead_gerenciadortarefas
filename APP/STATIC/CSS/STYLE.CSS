@@ -175,3 +175,62 @@ body {
     background: #c82333;
     transform: translateY(-2px);
 }
+/* Estilo base para todos os itens da lista de tarefas */
+.task-item {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 5px solid #667eea; /* Adiciona uma borda colorida à esquerda */
+    transition: all 0.3s ease;
+}
+
+/* Estilo para o botão de concluir */
+.btn-concluir {
+    background-color: #28a745; /* Verde */
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.btn-excluir {
+    background-color: #dc3545; /* Vermelho */
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.btn-excluir:hover {
+    background-color: #c82333; /* Vermelho mais escuro */
+}
+
+.btn-concluir:hover {
+    background-color: #218838; 
+}
+
+
+.task-item.task-completed {
+    background-color: #e9ecef;
+    border-left-color: #6c757d; 
+}
+
+.task-item.task-completed strong {
+    text-decoration: line-through; 
+    color: #6c757d; 
+}
+
+
+.task-item.task-completed .btn-concluir {
+    display: none;
+}

@@ -56,23 +56,37 @@
             {% if tarefas %}
                 <ul style="list-style: none; padding: 0;">
                     {% for tarefa in tarefas %}
-                        <li style="background: #f8f9fa; padding: 1rem; border-radius: 5px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
-                            
-                            <div>
-                                <strong style="font-size: 1.1rem;">{{ tarefa.titulo }}</strong>
-                                  
+<li class="task-item {% if tarefa.concluida %}task-completed{% endif %}">
 
-                                <small>
-                                    Prazo: 
-                                    {% if tarefa.data_prazo %}
-                                        {{ tarefa.data_prazo.strftime('%d/%m/%Y às %H:%M') }}
-                                    {% else %}
-                                        Sem prazo definido
-                                    {% endif %}
-                                </small>
-                            </div>
+    <div>
+        <strong style="font-size: 1.1rem;">{{ tarefa.titulo }}</strong>
+          
 
-                        </li>
+        <small>
+            Prazo: 
+            {% if tarefa.data_prazo %}
+                {{ tarefa.data_prazo.strftime('%d/%m/%Y às %H:%M') }}
+            {% else %}
+                Sem prazo definido
+            {% endif %}
+        </small>
+    </div>
+
+  <div class="task-actions" style="display: flex; gap: 0.5rem;">
+
+        {% if not tarefa.concluida %}
+            <form method="POST" action="{{ url_for('concluir_tarefa', tarefa_id=tarefa.id) }}">
+                <button type="submit" class="btn-concluir">Concluir</button>
+            </form>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('excluir_tarefa', tarefa_id=tarefa.id) }}">
+            <button type="submit" class="btn-excluir">Excluir</button>
+        </form>
+
+    </div>
+
+</li>
                     {% endfor %}
                 </ul>
             {% else %}
