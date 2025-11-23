@@ -1,11 +1,10 @@
-# 1. IMPORTAÇÃO ADICIONADA
 from datetime import datetime
 from flask import render_template, redirect, url_for, request, flash
 from APP import app, db, bcrypt
 from APP.models import Usuario, Tarefa
 from flask_login import login_user, logout_user, login_required, current_user
 
-
+# ROTA DE LOGIN (E PÁGINA INICIAL)
 @app.route('/')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -26,6 +25,7 @@ def login():
 
     return render_template('login.html')
 
+# ROTA DE CADASTRO
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
     if current_user.is_authenticated:
@@ -35,7 +35,6 @@ def cadastro():
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
-
 
         if not username or not email or not password:
             flash('Por favor, preencha todos os campos.', 'danger')
@@ -52,97 +51,78 @@ def cadastro():
 
     return render_template('cadastro.html')
 
-
+# ROTA DO DASHBOARD (PÁGINA PRINCIPAL APÓS LOGIN)
 @app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
-   
+    # Lógica para ADICIONAR uma nova tarefa
     if request.method == 'POST':
         titulo_tarefa = request.form.get('titulo')
         data_prazo_str = request.form.get('data_prazo')
         hora_prazo_str = request.form.get('hora_prazo')
         
-       
-        print(f"--- DEBUG: Recebido do formulário: Título='{titulo_tarefa}', Data='{data_prazo_str}', Hora='{hora_prazo_str}' ---")
-        
         if titulo_tarefa and data_prazo_str and hora_prazo_str:
-            
-            print("--- DEBUG: Todos os campos foram preenchidos. Tentando processar... ---")
-            
             try:
                 prazo_str_completo = f"{data_prazo_str} {hora_prazo_str}"
                 prazo_obj = datetime.strptime(prazo_str_completo, '%Y-%m-%d %H:%M')
-                
-                
-                print(f"--- DEBUG: Objeto datetime criado com sucesso: {prazo_obj} ---")
-
-                nova_tarefa = Tarefa(
-                    titulo=titulo_tarefa, 
-                    data_prazo=prazo_obj,
-                    usuario_id=current_user.id
-                )
-                
+                nova_tarefa = Tarefa(titulo=titulo_tarefa, data_prazo=prazo_obj, usuario_id=current_user.id)
                 db.session.add(nova_tarefa)
                 db.session.commit()
                 flash('Tarefa adicionada com sucesso!', 'success')
-                print("--- DEBUG: Tarefa salva no banco de dados com sucesso! ---")
-
             except Exception as e:
-                
-                print(f"--- ERRO: Ocorreu uma exceção: {e} ---")
                 flash('Ocorreu um erro ao processar a data e a hora.', 'danger')
-
         else:
-            
-            print("--- DEBUG: Um ou mais campos estavam vazios. Caindo no 'else'. ---")
             flash('Por favor, preencha todos os campos: título, data e hora.', 'danger')
         
         return redirect(url_for('dashboard'))
 
-    tarefas_do_usuario = Tarefa.query.filter_by(usuario_id=current_user.id).order_by(Tarefa.data_criacao.desc()).all()
-    return render_template('dashboard.html', tarefas=tarefas_do_usuario)
+    # Lógica para MOSTRAR as tarefas (com filtro e ordenação)
+    ordenar_por = request.args.get('ordenar_por', 'recentes')
+    filtro = request.args.get('filtro', 'todas')
 
+    query = Tarefa.query.filter_by(usuario_id=current_user.id)
+
+    if filtro == 'pendentes':
+        query = query.filter_by(concluida=False)
+    elif filtro == 'concluidas':
+        query = query.filter_by(concluida=True)
+
+    if ordenar_por == 'prazo':
+           query = query.order_by(Tarefa.data_prazo.is_(None), Tarefa.data_prazo.asc())
+    else:
+        query = query.order_by(Tarefa.data_criacao.desc())
+
+    tarefas_do_usuario = query.all()
+    
+    return render_template('dashboard.html', tarefas=tarefas_do_usuario, filtro_ativo=filtro, ordenacao_ativa=ordenar_por)
+
+# ROTA PARA CONCLUIR TAREFA
 @app.route('/tarefa/<int:tarefa_id>/concluir', methods=['POST'])
 @login_required
 def concluir_tarefa(tarefa_id):
-    
     tarefa = Tarefa.query.get_or_404(tarefa_id)
-
-    
     if tarefa.usuario_id != current_user.id:
         flash('Operação não permitida.', 'danger')
         return redirect(url_for('dashboard'))
-
-    
     tarefa.concluida = True
     db.session.commit()
-
     flash('Tarefa marcada como concluída!', 'success')
-    
-    
     return redirect(url_for('dashboard'))
 
+# ROTA PARA EXCLUIR TAREFA
 @app.route('/tarefa/<int:tarefa_id>/excluir', methods=['POST'])
 @login_required
 def excluir_tarefa(tarefa_id):
-
     tarefa = Tarefa.query.get_or_404(tarefa_id)
-
-
     if tarefa.usuario_id != current_user.id:
         flash('Operação não permitida.', 'danger')
         return redirect(url_for('dashboard'))
-
-
     db.session.delete(tarefa)
     db.session.commit()
-
     flash('Tarefa excluída com sucesso!', 'success')
-    
- 
     return redirect(url_for('dashboard'))
 
-
+# ROTA DE LOGOUT
 @app.route('/logout')
 @login_required 
 def logout():

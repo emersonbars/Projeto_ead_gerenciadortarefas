@@ -34,8 +34,6 @@
                     <label for="titulo">Título da Tarefa:</label>
                     <input type="text" id="titulo" name="titulo" required>
                 </div>
-
-                
                 <div class="form-group">
                     <label for="data_prazo">Data do Prazo:</label>
                     <input type="date" id="data_prazo" name="data_prazo" required>
@@ -44,49 +42,60 @@
                     <label for="hora_prazo">Hora do Prazo:</label>
                     <input type="time" id="hora_prazo" name="hora_prazo" required>
                 </div>
-                
-
                 <button type="submit" class="btn">Adicionar Tarefa</button>
             </form>
         </div>
 
         <div class="task-list">
             <h2>Suas Tarefas</h2>
+
+            <div class="sort-options" style="margin-bottom: 1rem; display: flex; gap: 1rem; align-items: center;">
+                <span style="font-weight: bold; color: #333;">Ordenar por:</span>
+                <a href="{{ url_for('dashboard', ordenar_por='prazo') }}" style="text-decoration: none; color: #667eea;">Prazo</a>
+                <span style="color: #ccc;">|</span>
+                <a href="{{ url_for('dashboard', ordenar_por='recentes') }}" style="text-decoration: none; color: #667eea;">Mais Recentes</a>
+            </div>
+
+            <div class="filter-options" style="margin-bottom: 1rem; display: flex; gap: 1rem; align-items: center;">
+                <span style="font-weight: bold; color: #333;">Mostrar:</span>
+                <a href="{{ url_for('dashboard', filtro='todas') }}" style="text-decoration: none; color: #667eea;">Todas</a>
+                <span style="color: #ccc;">|</span>
+                <a href="{{ url_for('dashboard', filtro='pendentes') }}" style="text-decoration: none; color: #667eea;">Pendentes</a>
+                <span style="color: #ccc;">|</span>
+                <a href="{{ url_for('dashboard', filtro='concluidas') }}" style="text-decoration: none; color: #667eea;">Concluídas</a>
+            </div>
             
             {% if tarefas %}
                 <ul style="list-style: none; padding: 0;">
                     {% for tarefa in tarefas %}
-<li class="task-item {% if tarefa.concluida %}task-completed{% endif %}">
+                        <li class="task-item {% if tarefa.concluida %}task-completed{% endif %}">
+                            
+                            <div>
+                                <strong style="font-size: 1.1rem;">{{ tarefa.titulo }}</strong>
+                                  
 
-    <div>
-        <strong style="font-size: 1.1rem;">{{ tarefa.titulo }}</strong>
-          
+                                <small>
+                                    Prazo: 
+                                    {% if tarefa.data_prazo %}
+                                        {{ tarefa.data_prazo.strftime('%d/%m/%Y às %H:%M') }}
+                                    {% else %}
+                                        Sem prazo definido
+                                    {% endif %}
+                                </small>
+                            </div>
 
-        <small>
-            Prazo: 
-            {% if tarefa.data_prazo %}
-                {{ tarefa.data_prazo.strftime('%d/%m/%Y às %H:%M') }}
-            {% else %}
-                Sem prazo definido
-            {% endif %}
-        </small>
-    </div>
+                            <div class="task-actions" style="display: flex; gap: 0.5rem;">
+                                {% if not tarefa.concluida %}
+                                    <form method="POST" action="{{ url_for('concluir_tarefa', tarefa_id=tarefa.id) }}">
+                                        <button type="submit" class="btn-concluir">Concluir</button>
+                                    </form>
+                                {% endif %}
+                                <form method="POST" action="{{ url_for('excluir_tarefa', tarefa_id=tarefa.id) }}">
+                                    <button type="submit" class="btn-excluir">Excluir</button>
+                                </form>
+                            </div>
 
-  <div class="task-actions" style="display: flex; gap: 0.5rem;">
-
-        {% if not tarefa.concluida %}
-            <form method="POST" action="{{ url_for('concluir_tarefa', tarefa_id=tarefa.id) }}">
-                <button type="submit" class="btn-concluir">Concluir</button>
-            </form>
-        {% endif %}
-
-        <form method="POST" action="{{ url_for('excluir_tarefa', tarefa_id=tarefa.id) }}">
-            <button type="submit" class="btn-excluir">Excluir</button>
-        </form>
-
-    </div>
-
-</li>
+                        </li>
                     {% endfor %}
                 </ul>
             {% else %}
