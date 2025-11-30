@@ -88,7 +88,7 @@ def dashboard():
         query = query.filter_by(concluida=True)
 
     if ordenar_por == 'prazo':
-           query = query.order_by(Tarefa.data_prazo.is_(None), Tarefa.data_prazo.asc())
+        query = query.order_by(Tarefa.data_prazo.is_(None), Tarefa.data_prazo.asc())
     else:
         query = query.order_by(Tarefa.data_criacao.desc())
 
@@ -121,6 +121,57 @@ def excluir_tarefa(tarefa_id):
     db.session.commit()
     flash('Tarefa excluída com sucesso!', 'success')
     return redirect(url_for('dashboard'))
+
+# ROTA PARA EDITAR TAREFA (com depuração)
+@app.route('/tarefa/<int:tarefa_id>/editar', methods=['GET', 'POST'])
+@login_required
+def editar_tarefa(tarefa_id):
+    # Busca a tarefa que será editada
+    tarefa = Tarefa.query.get_or_404(tarefa_id)
+
+    # Segurança: Garante que o usuário só pode editar suas próprias tarefas
+    if tarefa.usuario_id != current_user.id:
+        flash('Operação não permitida.', 'danger')
+        return redirect(url_for('dashboard'))
+
+    # Se o formulário for enviado (método POST)
+    if request.method == 'POST':
+        # Pega os novos dados do formulário
+        novo_titulo = request.form.get('titulo')
+        nova_data_str = request.form.get('data_prazo')
+        nova_hora_str = request.form.get('hora_prazo')
+
+        print(f"--- EDITAR DEBUG: Recebido do formulário: Título='{novo_titulo}', Data='{nova_data_str}', Hora='{nova_hora_str}' ---")
+
+        if novo_titulo and nova_data_str and nova_hora_str:
+            try:
+                print(f"--- EDITAR DEBUG: Título antigo: {tarefa.titulo}, Prazo antigo: {tarefa.data_prazo} ---")
+
+                # Atualiza os campos da tarefa com os novos valores
+                tarefa.titulo = novo_titulo
+                
+                prazo_str_completo = f"{nova_data_str} {nova_hora_str}"
+                tarefa.data_prazo = datetime.strptime(prazo_str_completo, '%Y-%m-%d %H:%M')
+
+                print(f"--- EDITAR DEBUG: Título novo: {tarefa.titulo}, Prazo novo: {tarefa.data_prazo} ---")
+
+                # Confirma a alteração no banco de dados
+                print("--- EDITAR DEBUG: Tentando salvar (db.session.commit())... ---")
+                db.session.commit()
+                print("--- EDITAR DEBUG: Salvo com sucesso! ---")
+
+                flash('Tarefa atualizada com sucesso!', 'success')
+                return redirect(url_for('dashboard'))
+
+            except Exception as e:
+                print(f"--- EDITAR ERRO: Ocorreu uma exceção: {e} ---")
+                flash('Ocorreu um erro ao atualizar a tarefa.', 'danger')
+        else:
+            flash('Todos os campos são obrigatórios.', 'danger')
+    
+    # Se for a primeira vez que a página é carregada (método GET)
+    # Renderiza o template, passando a tarefa para pré-preencher o formulário
+    return render_template('editar_tarefa.html', tarefa=tarefa)
 
 # ROTA DE LOGOUT
 @app.route('/logout')

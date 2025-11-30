@@ -68,7 +68,7 @@
             {% if tarefas %}
                 <ul style="list-style: none; padding: 0;">
                     {% for tarefa in tarefas %}
-                        <li class="task-item {% if tarefa.concluida %}task-completed{% endif %}">
+                        <li class="task-item status-{{ tarefa.status_prazo }}">
                             
                             <div>
                                 <strong style="font-size: 1.1rem;">{{ tarefa.titulo }}</strong>
@@ -84,13 +84,19 @@
                                 </small>
                             </div>
 
-                            <div class="task-actions" style="display: flex; gap: 0.5rem;">
+<div class="task-actions" style="display: flex; gap: 0.5rem;">
+                                <!-- BOTÃO EDITAR (é um link, não um form) -->
+                                <a href="{{ url_for('editar_tarefa', tarefa_id=tarefa.id) }}" class="btn-editar">Editar</a>
+
+                                <!-- BOTÃO CONCLUIR -->
                                 {% if not tarefa.concluida %}
-                                    <form method="POST" action="{{ url_for('concluir_tarefa', tarefa_id=tarefa.id) }}">
+                                    <form method="POST" action="{{ url_for('concluir_tarefa', tarefa_id=tarefa.id) }}" style="margin: 0;">
                                         <button type="submit" class="btn-concluir">Concluir</button>
                                     </form>
                                 {% endif %}
-                                <form method="POST" action="{{ url_for('excluir_tarefa', tarefa_id=tarefa.id) }}">
+
+                                <!-- BOTÃO EXCLUIR -->
+                                <form method="POST" action="{{ url_for('excluir_tarefa', tarefa_id=tarefa.id) }}" style="margin: 0;">
                                     <button type="submit" class="btn-excluir">Excluir</button>
                                 </form>
                             </div>

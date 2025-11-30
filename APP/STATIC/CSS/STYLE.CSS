@@ -175,7 +175,7 @@ body {
     background: #c82333;
     transform: translateY(-2px);
 }
-/* Estilo base para todos os itens da lista de tarefas */
+
 .task-item {
     background: #f8f9fa;
     padding: 1rem;
@@ -184,13 +184,13 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-left: 5px solid #667eea; /* Adiciona uma borda colorida à esquerda */
+    border-left: 5px solid #667eea; 
     transition: all 0.3s ease;
 }
 
-/* Estilo para o botão de concluir */
+
 .btn-concluir {
-    background-color: #28a745; /* Verde */
+    background-color: #28a745; 
     color: white;
     border: none;
     padding: 0.5rem 1rem;
@@ -201,7 +201,7 @@ body {
 }
 
 .btn-excluir {
-    background-color: #dc3545; /* Vermelho */
+    background-color: #dc3545; 
     color: white;
     border: none;
     padding: 0.5rem 1rem;
@@ -212,7 +212,7 @@ body {
 }
 
 .btn-excluir:hover {
-    background-color: #c82333; /* Vermelho mais escuro */
+    background-color: #c82333; 
 }
 
 .btn-concluir:hover {
@@ -233,4 +233,51 @@ body {
 
 .task-item.task-completed .btn-concluir {
     display: none;
+}
+
+
+
+.task-item.status-concluida {
+    background-color: #e9ecef;
+    border-left-color: #6c757d; 
+}
+
+.task-item.status-concluida strong {
+    text-decoration: line-through; 
+    color: #6c757d; 
+}
+
+
+
+
+.task-item.status-hoje {
+    border-left-color: #ffc107; 
+    background-color: #fff3cd;
+}
+
+
+.task-item.status-atrasada {
+    border-left-color: #dc3545; 
+    background-color: #f8d7da;
+}
+
+
+.task-item.status-sem_prazo {
+    border-left-color: #ccc; 
+}
+
+.btn-editar {
+    background-color: #007bff; 
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14px; 
+    line-height: 1.5;  
+    transition: background-color 0.3s;
+}
+
+.btn-editar:hover {
+    background-color: #0056b3; 
 }
